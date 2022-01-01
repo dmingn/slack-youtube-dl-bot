@@ -1,0 +1,30 @@
+[tool.black]
+line-length = 79
+
+[tool.flake8]
+extend-ignore = "E203,E501,W503,W504"
+
+[tool.isort]
+include_trailing_comma = true
+line_length = 79
+multi_line_output = 3
+
+[tool.poetry]
+name = "slack-youtube-dl-bot"
+version = "0.1.0"
+description = ""
+authors = ["dmingn <dmingn@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^21.12b0"
+pyproject-flake8 = "^0.0.1-alpha.2"
+isort = "^5.10.1"
+mypy = "^0.930"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

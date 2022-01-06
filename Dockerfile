@@ -1,3 +1,4 @@
+# TODO: minimize image size
 FROM python:3.10-slim
 
 WORKDIR /slack-youtube-dl-bot
@@ -8,4 +9,6 @@ COPY pyproject.toml poetry.lock ./
 
 RUN poetry install
 
-ENTRYPOINT ["bash"]
+COPY src ./src
+
+ENTRYPOINT ["poetry", "run", "python", "src/slack_youtube_dl_bot/main.py"]

@@ -9,6 +9,6 @@ COPY pyproject.toml poetry.lock ./
 
 RUN poetry install
 
-COPY src ./src
+COPY slack_youtube_dl_bot ./slack_youtube_dl_bot
 
-ENTRYPOINT ["poetry", "run", "python", "src/slack_youtube_dl_bot/main.py"]
+ENTRYPOINT ["poetry", "run", "python", "-m", "slack_youtube_dl_bot"]

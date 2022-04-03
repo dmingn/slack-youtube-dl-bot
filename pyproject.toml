@@ -1,5 +1,5 @@
 [tool.flake8]
-extend-ignore = "E203,E501,W503,W504"
+extend-ignore = "E501,W503"
 
 [tool.isort]
 profile = "black"

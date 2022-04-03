@@ -25,7 +25,7 @@ def echo(message, say):
             say(f"ERROR: {d=}")
 
     ydl_opts = {
-        "outtmpl": "/out/%(title)s.%(ext)s",
+        "outtmpl": "/out/%(extractor)s/%(title)s-%(id)s.%(ext)s",
         "progress_hooks": [hook],
     }
 

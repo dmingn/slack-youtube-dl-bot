@@ -30,6 +30,8 @@ def echo(message, say):
     }
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        say(f"start downloading {text}")
+
         try:
             ydl.download([text])
         except youtube_dl.utils.DownloadError as e:

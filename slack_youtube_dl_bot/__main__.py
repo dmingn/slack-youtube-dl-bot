@@ -41,7 +41,7 @@ async def download(job: Job, message_prefix: str = "") -> None:
                 "-m",
                 "youtube_dl",
                 "-o",
-                '"/out/%(extractor)s/%(title)s-%(id)s.%(ext)s"',
+                '"/out/%(extractor)s/%(channel)s - %(channel_id)s/%(playlist)s - %(playlist_id)s/%(title)s - %(id)s.%(ext)s"',
                 f'"{url}"',
             ]
         ),

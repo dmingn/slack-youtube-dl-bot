@@ -26,7 +26,7 @@ def echo(message, say):
 
     ydl_opts = {
         "ignoreerrors": True,
-        "outtmpl": "/out/%(extractor)s/%(title)s-%(id)s.%(ext)s",
+        "outtmpl": "/out/%(extractor)s/%(channel)s - %(channel_id)s/%(playlist)s - %(playlist_id)s/%(title)s - %(id)s.%(ext)s",
         "progress_hooks": [hook],
     }
 

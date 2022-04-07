@@ -1,43 +1,99 @@
+import asyncio
 import os
 
-import youtube_dl
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
+import click
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
+from slack_bolt.async_app import AsyncApp
+from slack_bolt.context.say.async_say import AsyncSay
 
-app = App(token=os.environ["SLACK_BOT_TOKEN"])
+app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
+
+Job = tuple[str, AsyncSay]
+job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 
 @app.message("")
-def echo(message, say):
+async def receive_url(message, say):
     # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
     # NOTE: https://api.slack.com/reference/surfaces/formatting
-    text = message["text"].strip("<>")
+    url = message["text"].strip("<>")
 
-    def hook(d):
-        if d["status"] == "finished":
-            if "_elapsed_str" in d:
-                say(
-                    f"{d['filename']} is successfully downloaded in {d['_elapsed_str']}"
-                )
-            else:
-                say(f"{d['filename']} has already been downloaded")
-        if d["status"] == "error":
-            say(f"ERROR: {d=}")
+    await job_queue.put((url, say))
 
-    ydl_opts = {
-        "ignoreerrors": True,
-        "outtmpl": "/out/%(extractor)s/%(title)s-%(id)s.%(ext)s",
-        "progress_hooks": [hook],
-    }
+    await say(
+        "\n".join(
+            [
+                f"{url} is pushed to the job queue.",
+                "--- Current job queue ---",
+            ]
+            + [f"{i+1}: {job[0]}" for i, job in enumerate(job_queue._queue)]
+        )
+    )
 
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        say(f"start downloading {text}")
 
-        try:
-            ydl.download([text])
-        except youtube_dl.utils.DownloadError as e:
-            say(str(e))
+async def download(job: Job, message_prefix: str = "") -> None:
+    url, say = job
+
+    proc = await asyncio.create_subprocess_shell(
+        " ".join(
+            [
+                "python",
+                "-m",
+                "youtube_dl",
+                "-o",
+                '"/out/%(extractor)s/%(title)s-%(id)s.%(ext)s"',
+                f'"{url}"',
+            ]
+        ),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    if proc.stdout and proc.stderr:
+        while True:
+            if proc.stdout.at_eof() and proc.stderr.at_eof():
+                break
+
+            stdout = (await proc.stdout.readline()).decode()
+            if stdout:
+                await say(message_prefix + stdout)
+            stderr = (await proc.stderr.readline()).decode()
+            if stderr:
+                await say(message_prefix + stderr)
+
+            await asyncio.sleep(1)
+
+    await proc.communicate()
+
+
+async def worker(id: int):
+    while True:
+        job = await job_queue.get()
+
+        await download(job, message_prefix=f"[worker-{id}] ")
+
+        job_queue.task_done()
+
+
+async def main(n_workers: int):
+    slack_bot = asyncio.create_task(
+        AsyncSocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start_async()
+    )
+
+    workers = [asyncio.create_task(worker(i)) for i in range(n_workers)]
+
+    await slack_bot
+    await job_queue.join()
+    for w in workers:
+        w.cancel()
+    await asyncio.gather(*workers, return_exceptions=True)
+
+
+@click.command()
+@click.option("--n_workers", type=click.IntRange(min=1), default=1)
+def cli(n_workers: int):
+    asyncio.run(main(n_workers=n_workers))
 
 
 if __name__ == "__main__":
-    SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
+    cli()

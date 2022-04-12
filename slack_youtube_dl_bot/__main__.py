@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 import os
 
 import click
@@ -8,7 +9,13 @@ from slack_bolt.context.say.async_say import AsyncSay
 
 app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
 
-Job = tuple[str, AsyncSay]
+
+@dataclasses.dataclass(frozen=True)
+class Job:
+    url: str
+    say: AsyncSay
+
+
 job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 
@@ -18,7 +25,7 @@ async def receive_url(message, say):
     # NOTE: https://api.slack.com/reference/surfaces/formatting
     url = message["text"].strip("<>")
 
-    await job_queue.put((url, say))
+    await job_queue.put(Job(url=url, say=say))
 
     await say(
         "\n".join(
@@ -32,8 +39,6 @@ async def receive_url(message, say):
 
 
 async def download(job: Job, message_prefix: str = "") -> None:
-    url, say = job
-
     proc = await asyncio.create_subprocess_shell(
         " ".join(
             [
@@ -43,7 +48,7 @@ async def download(job: Job, message_prefix: str = "") -> None:
                 "-o",
                 '"/out/%(extractor)s/%(channel)s - %(channel_id)s/%(playlist)s - %(playlist_id)s/%(title)s - %(id)s.%(ext)s"',
                 "--no-progress",
-                f'"{url}"',
+                f'"{job.url}"',
             ]
         ),
         stdout=asyncio.subprocess.PIPE,
@@ -57,10 +62,10 @@ async def download(job: Job, message_prefix: str = "") -> None:
 
             stdout = (await proc.stdout.readline()).decode()
             if stdout:
-                await say(message_prefix + stdout)
+                await job.say(message_prefix + stdout)
             stderr = (await proc.stderr.readline()).decode()
             if stderr:
-                await say(message_prefix + stderr)
+                await job.say(message_prefix + stderr)
 
             await asyncio.sleep(1)
 

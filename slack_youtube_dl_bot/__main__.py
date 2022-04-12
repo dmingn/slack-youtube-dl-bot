@@ -32,14 +32,17 @@ job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 
 async def say_job_queue(say: AsyncSay):
-    await say(
-        "\n".join(
-            [
-                "--- Current job queue ---",
-            ]
-            + [f"{i+1}: {job.url}" for i, job in enumerate(job_queue._queue)]
+    if job_queue.empty:
+        await asyncio.sleep(0)
+    else:
+        await say(
+            "\n".join(
+                [
+                    "--- Current job queue ---",
+                ]
+                + [f"{i+1}: {job.url}" for i, job in enumerate(job_queue._queue)]
+            )
         )
-    )
 
 
 @app.message("")

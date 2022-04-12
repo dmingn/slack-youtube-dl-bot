@@ -1,6 +1,8 @@
 import asyncio
 import dataclasses
 import os
+from functools import partial
+from typing import Any
 
 import click
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
@@ -12,30 +14,43 @@ app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
 
 @dataclasses.dataclass(frozen=True)
 class Job:
-    url: str
+    message: dict[str, Any]
     say: AsyncSay
+
+    @property
+    def url(self) -> str:
+        # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
+        # NOTE: https://api.slack.com/reference/surfaces/formatting
+        return self.message["text"].strip("<>")
+
+    @property
+    def reply(self):
+        return partial(self.say, thread_ts=self.message["ts"])
 
 
 job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 
-@app.message("")
-async def receive_url(message, say):
-    # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
-    # NOTE: https://api.slack.com/reference/surfaces/formatting
-    url = message["text"].strip("<>")
-
-    await job_queue.put(Job(url=url, say=say))
-
+async def say_job_queue(say: AsyncSay):
     await say(
         "\n".join(
             [
-                f"{url} is pushed to the job queue.",
                 "--- Current job queue ---",
             ]
-            + [f"{i+1}: {job[0]}" for i, job in enumerate(job_queue._queue)]
+            + [f"{i+1}: {job.url}" for i, job in enumerate(job_queue._queue)]
         )
     )
+
+
+@app.message("")
+async def receive_url(message, say):
+    job = Job(message=message, say=say)
+
+    await job_queue.put(job)
+
+    await job.reply(f"{job.url} is pushed to the job queue.")
+
+    await say_job_queue(job.say)
 
 
 async def download(job: Job, message_prefix: str = "") -> None:
@@ -62,10 +77,10 @@ async def download(job: Job, message_prefix: str = "") -> None:
 
             stdout = (await proc.stdout.readline()).decode()
             if stdout:
-                await job.say(message_prefix + stdout)
+                await job.reply(message_prefix + stdout)
             stderr = (await proc.stderr.readline()).decode()
             if stderr:
-                await job.say(message_prefix + stderr)
+                await job.reply(message_prefix + stderr)
 
             await asyncio.sleep(1)
 
@@ -75,6 +90,8 @@ async def download(job: Job, message_prefix: str = "") -> None:
 async def worker(id: int):
     while True:
         job = await job_queue.get()
+
+        await say_job_queue(job.say)
 
         await download(job, message_prefix=f"[worker-{id}] ")
 

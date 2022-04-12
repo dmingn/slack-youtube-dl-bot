@@ -1,6 +1,7 @@
 import asyncio
 import dataclasses
 import os
+from typing import Any
 
 import click
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
@@ -12,8 +13,14 @@ app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
 
 @dataclasses.dataclass(frozen=True)
 class Job:
-    url: str
+    message: dict[str, Any]
     say: AsyncSay
+
+    @property
+    def url(self) -> str:
+        # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
+        # NOTE: https://api.slack.com/reference/surfaces/formatting
+        return self.message["text"].strip("<>")
 
 
 job_queue: asyncio.Queue[Job] = asyncio.Queue()
@@ -21,16 +28,14 @@ job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 @app.message("")
 async def receive_url(message, say):
-    # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
-    # NOTE: https://api.slack.com/reference/surfaces/formatting
-    url = message["text"].strip("<>")
+    job = Job(message=message, say=say)
 
-    await job_queue.put(Job(url=url, say=say))
+    await job_queue.put(job)
 
     await say(
         "\n".join(
             [
-                f"{url} is pushed to the job queue.",
+                f"{job.url} is pushed to the job queue.",
                 "--- Current job queue ---",
             ]
             + [f"{i+1}: {job[0]}" for i, job in enumerate(job_queue._queue)]

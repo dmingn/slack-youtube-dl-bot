@@ -7,7 +7,7 @@ name = "pypi"
 aiohttp = "*"
 click = "*"
 slack-bolt = "*"
-youtube-dl = "*"
+yt-dlp = "*"
 
 [dev-packages]
 black = "*"

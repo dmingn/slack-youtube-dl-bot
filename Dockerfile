@@ -1,6 +1,6 @@
 FROM python:3.10-slim AS builder
 
-WORKDIR /slack-youtube-dl-bot
+WORKDIR /workdir
 
 ENV PIPENV_HOME=/opt/pipenv
 
@@ -13,7 +13,7 @@ RUN $PIPENV_HOME/bin/pipenv sync --system
 
 FROM python:3.10-slim
 
-WORKDIR /slack-youtube-dl-bot
+WORKDIR /workdir
 
 # TODO: reduce image size
 RUN apt-get update && \

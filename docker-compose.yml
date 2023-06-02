@@ -1,7 +1,8 @@
-version: '3'
 services:
   app:
     build: .
+    image: slack-youtube-dl-bot:latest
+    pull_policy: build
     env_file:
       - ./.env
     volumes:

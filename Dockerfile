@@ -2,12 +2,14 @@ FROM python:3.10-slim AS builder
 
 WORKDIR /slack-youtube-dl-bot
 
-RUN pip install poetry
+ENV PIPENV_HOME=/opt/pipenv
 
-COPY pyproject.toml poetry.lock ./
+RUN python3 -m venv $PIPENV_HOME && \
+    $PIPENV_HOME/bin/pip install pipenv==2023.6.2
 
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-dev
+COPY Pipfile Pipfile.lock ./
+
+RUN $PIPENV_HOME/bin/pipenv sync --system
 
 FROM python:3.10-slim
 

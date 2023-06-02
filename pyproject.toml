@@ -1,29 +1,2 @@
-[tool.flake8]
-extend-ignore = "E501,W503"
-
 [tool.isort]
 profile = "black"
-
-[tool.poetry]
-name = "slack-youtube-dl-bot"
-version = "0.1.0"
-description = ""
-authors = ["dmingn <dmingn@users.noreply.github.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-aiohttp = "^3.8.1"
-click = "^8.1.2"
-slack-bolt = "^1.11.1"
-youtube_dl = "^2021.12.17"
-
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-black = "^22.3.0"
-pyproject-flake8 = "^0.0.1-alpha.2"
-isort = "^5.10.1"
-mypy = "^0.930"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"

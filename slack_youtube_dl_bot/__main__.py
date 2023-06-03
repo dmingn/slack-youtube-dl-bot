@@ -62,7 +62,7 @@ async def download(job: Job, message_prefix: str = "") -> None:
             [
                 "python",
                 "-m",
-                "youtube_dl",
+                "yt-dlp",
                 "-o",
                 '"/out/%(extractor)s/%(channel)s - %(channel_id)s/%(playlist)s - %(playlist_id)s/%(title)s - %(id)s.%(ext)s"',
                 "--no-progress",

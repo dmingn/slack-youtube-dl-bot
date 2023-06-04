@@ -21,7 +21,7 @@ jobs:
       contents: read
       packages: write
     outputs:
-      tags: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build-push-action.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -47,6 +47,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
+        id: build-push-action
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -61,7 +62,7 @@ jobs:
 
     steps:
       - name: Check if yt-dlp is installed
-        uses: ${{ needs.build-and-push-image.outputs.tags[0] }}
+        uses: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-push-image.outputs.digest }}
         with:
           entrypoint: python
           args: '-m yt_dlp --version'

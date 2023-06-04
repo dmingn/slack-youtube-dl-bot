@@ -21,7 +21,7 @@ jobs:
       contents: read
       packages: write
     outputs:
-      digest: ${{ steps.build-push-action.outputs.digest }}
+      image-uri: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-push-action.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -62,7 +62,7 @@ jobs:
 
     steps:
       - name: Check if yt-dlp is installed
-        uses: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-and-push-image.outputs.digest }}
+        uses: ${{ needs.build-and-push-image.outputs.image-uri }}
         with:
           entrypoint: python
           args: '-m yt_dlp --version'

@@ -20,6 +20,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      image-uri: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-push-action.outputs.digest }}
 
     steps:
       - name: Checkout repository
@@ -45,6 +47,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
+        id: build-push-action
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -52,3 +55,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [build-and-push-image]
+
+    steps:
+      - name: Check if yt-dlp is installed
+        run: docker run --entrypoint python ${{ needs.build-and-push-image.outputs.image-uri }} -m yt_dlp --version

@@ -62,7 +62,4 @@ jobs:
 
     steps:
       - name: Check if yt-dlp is installed
-        uses: ${{ needs.build-and-push-image.outputs.image-uri }}
-        with:
-          entrypoint: python
-          args: '-m yt_dlp --version'
+        run: docker run --entrypoint python ${{ needs.build-and-push-image.outputs.image-uri }} -m yt_dlp --version

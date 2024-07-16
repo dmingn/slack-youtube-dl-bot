@@ -4,9 +4,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    reviewers:
+      - dmingn
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
     allow:
       - dependency-name: "yt-dlp"
+    reviewers:
+      - dmingn

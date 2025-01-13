@@ -4,7 +4,7 @@ from functools import partial
 
 import click
 from logzero import logger
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, ValidationError
 from pydantic.dataclasses import dataclass
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
@@ -51,11 +51,17 @@ async def say_job_queue(say: AsyncSay):
 async def receive_url(message, say):
     logger.debug(f"Received a message: {message}")
 
-    job = Job(
-        url=extract_url_from_message_text(message["text"]),
-        thread_ts=message["ts"],
-        say=say,
-    )
+    try:
+        job = Job(
+            url=extract_url_from_message_text(message["text"]),
+            thread_ts=message["ts"],
+            say=say,
+        )
+    except ValidationError as e:
+        logger.error(e)
+        await say(f"Invalid message: {message['text']}", thread_ts=message["ts"])
+        await say(e, thread_ts=message["ts"])
+        return
 
     await job_queue.put(job)
 

@@ -2,7 +2,6 @@ import asyncio
 import dataclasses
 import os
 from functools import partial
-from typing import Any
 
 import click
 from logzero import logger
@@ -13,20 +12,21 @@ from slack_bolt.context.say.async_say import AsyncSay
 app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
 
 
+def extract_url_from_message_text(text: str) -> str:
+    # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
+    # NOTE: https://api.slack.com/reference/surfaces/formatting
+    return text.strip("<>")
+
+
 @dataclasses.dataclass(frozen=True)
 class Job:
-    message: dict[str, Any]
+    url: str
+    thread_ts: str
     say: AsyncSay
 
     @property
-    def url(self) -> str:
-        # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
-        # NOTE: https://api.slack.com/reference/surfaces/formatting
-        return self.message["text"].strip("<>")
-
-    @property
     def reply(self):
-        return partial(self.say, thread_ts=self.message["ts"])
+        return partial(self.say, thread_ts=self.thread_ts)
 
 
 job_queue: asyncio.Queue[Job] = asyncio.Queue()
@@ -50,7 +50,11 @@ async def say_job_queue(say: AsyncSay):
 async def receive_url(message, say):
     logger.debug(f"Received a message: {message}")
 
-    job = Job(message=message, say=say)
+    job = Job(
+        url=extract_url_from_message_text(message["text"]),
+        thread_ts=message["ts"],
+        say=say,
+    )
 
     await job_queue.put(job)
 

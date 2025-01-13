@@ -7,6 +7,7 @@ name = "pypi"
 aiohttp = "*"
 click = "*"
 logzero = "*"
+pydantic = "*"
 slack-bolt = "*"
 yt-dlp = "*"
 
@@ -15,6 +16,7 @@ black = "*"
 isort = "*"
 flake8 = "*"
 mypy = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.10"

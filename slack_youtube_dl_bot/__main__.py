@@ -5,6 +5,7 @@ from functools import partial
 from typing import Any
 
 import click
+from logzero import logger
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
 from slack_bolt.context.say.async_say import AsyncSay
@@ -47,16 +48,21 @@ async def say_job_queue(say: AsyncSay):
 
 @app.message("")
 async def receive_url(message, say):
+    logger.debug(f"Received a message: {message}")
+
     job = Job(message=message, say=say)
 
     await job_queue.put(job)
 
+    logger.debug(f"{job.url} is pushed to the job queue.")
     await job.reply(f"{job.url} is pushed to the job queue.")
 
     await say_job_queue(job.say)
 
 
 async def download(job: Job, message_prefix: str = "") -> None:
+    logger.debug(f"Start downloading {job.url}")
+
     proc = await asyncio.create_subprocess_shell(
         " ".join(
             [
@@ -80,17 +86,23 @@ async def download(job: Job, message_prefix: str = "") -> None:
 
             stdout = (await proc.stdout.readline()).decode()
             if stdout:
+                logger.debug(stdout)
                 await job.reply(message_prefix + stdout)
             stderr = (await proc.stderr.readline()).decode()
             if stderr:
+                logger.debug(stderr)
                 await job.reply(message_prefix + stderr)
 
             await asyncio.sleep(1)
 
     await proc.communicate()
 
+    logger.debug(f"Finish downloading {job.url}")
+
 
 async def worker(id: int):
+    logger.debug(f"Start worker-{id}")
+
     while True:
         job = await job_queue.get()
 
@@ -102,6 +114,8 @@ async def worker(id: int):
 
 
 async def main(n_workers: int):
+    logger.debug(f"Start the bot with {n_workers} workers.")
+
     slack_bot = asyncio.create_task(
         AsyncSocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start_async()
     )

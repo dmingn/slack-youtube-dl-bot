@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 from functools import partial
 
 import click
@@ -14,9 +15,12 @@ app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
 
 
 def extract_url_from_message_text(text: str) -> str:
-    # TODO: text の mrkdwn 形式から plain_text 形式への変換をちゃんとやる
-    # NOTE: https://api.slack.com/reference/surfaces/formatting
-    return text.strip("<>")
+    # cf. https://api.slack.com/reference/surfaces/formatting#linking-urls
+    url_pattern = re.compile(r"<(https?://[^>|]+)")
+    match = url_pattern.search(text)
+    if match:
+        return match.group(1)
+    return ""
 
 
 @dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))

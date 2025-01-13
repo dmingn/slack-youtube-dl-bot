@@ -12,7 +12,7 @@ yt-dlp = "*"
 
 [dev-packages]
 black = "*"
-isort = {extras = ["pyproject"], version = "*"}
+isort = "*"
 flake8 = "*"
 mypy = "*"
 

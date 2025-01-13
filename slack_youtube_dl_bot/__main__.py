@@ -33,7 +33,7 @@ job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 
 async def say_job_queue(say: AsyncSay):
-    if job_queue.empty:
+    if job_queue.empty():
         await asyncio.sleep(0)
     else:
         await say(

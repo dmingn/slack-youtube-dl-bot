@@ -7,6 +7,7 @@ name = "pypi"
 aiohttp = "*"
 click = "*"
 logzero = "*"
+pydantic = "*"
 slack-bolt = "*"
 yt-dlp = "*"
 

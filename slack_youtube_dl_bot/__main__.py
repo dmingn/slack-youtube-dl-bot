@@ -4,7 +4,7 @@ from functools import partial
 
 import click
 from logzero import logger
-from pydantic import AnyHttpUrl, ValidationError
+from pydantic import AnyHttpUrl, ConfigDict, ValidationError
 from pydantic.dataclasses import dataclass
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
@@ -19,7 +19,7 @@ def extract_url_from_message_text(text: str) -> str:
     return text.strip("<>")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class Job:
     url: AnyHttpUrl
     thread_ts: str

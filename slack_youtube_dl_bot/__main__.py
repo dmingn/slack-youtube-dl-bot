@@ -4,6 +4,7 @@ from functools import partial
 
 import click
 from logzero import logger
+from pydantic import AnyHttpUrl
 from pydantic.dataclasses import dataclass
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
@@ -20,7 +21,7 @@ def extract_url_from_message_text(text: str) -> str:
 
 @dataclass(frozen=True)
 class Job:
-    url: str
+    url: AnyHttpUrl
     thread_ts: str
     say: AsyncSay
 

@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 aiohttp = "*"
 click = "*"
+logzero = "*"
 slack-bolt = "*"
 yt-dlp = "*"
 

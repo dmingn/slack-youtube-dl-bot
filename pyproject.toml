@@ -1,2 +1,6 @@
 [tool.isort]
 profile = "black"
+
+[[tool.mypy.overrides]]
+module = ['logzero']
+ignore_missing_imports = true

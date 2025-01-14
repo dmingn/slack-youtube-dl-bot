@@ -37,20 +37,6 @@ class Job:
 job_queue: asyncio.Queue[Job] = asyncio.Queue()
 
 
-async def say_job_queue(say: AsyncSay):
-    if job_queue.empty():
-        await asyncio.sleep(0)
-    else:
-        await say(
-            "\n".join(
-                [
-                    "--- Current job queue ---",
-                ]
-                + [f"{i+1}: {job.url}" for i, job in enumerate(job_queue._queue)]
-            )
-        )
-
-
 @app.message("")
 async def receive_url(message, say):
     logger.debug(f"Received a message: {message}")
@@ -71,8 +57,6 @@ async def receive_url(message, say):
 
     logger.debug(f"{job.url} is pushed to the job queue.")
     await job.reply(f"{job.url} is pushed to the job queue.")
-
-    await say_job_queue(job.say)
 
 
 async def download(job: Job, message_prefix: str = "") -> None:
@@ -120,8 +104,6 @@ async def worker(id: int):
 
     while True:
         job = await job_queue.get()
-
-        await say_job_queue(job.say)
 
         await download(job, message_prefix=f"[worker-{id}] ")
 

@@ -11,15 +11,19 @@ COPY Pipfile Pipfile.lock ./
 
 RUN $PIPENV_HOME/bin/pipenv sync --system
 
+FROM alpine:latest AS ffmpeg-downloader
+
+WORKDIR /workdir
+
+RUN apk add --no-cache curl
+
+RUN curl -L https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz | tar -Jxf -
+
 FROM python:3.10-slim
 
 WORKDIR /workdir
 
-# TODO: reduce image size
-RUN apt-get update && \
-    apt-get install -y ffmpeg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+COPY --from=ffmpeg-downloader /workdir/ffmpeg-master-latest-linux64-gpl/bin /usr/local/bin
 
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 

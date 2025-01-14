@@ -19,12 +19,17 @@ jobs:
           date_prefix=$(date +"%Y.%m.%d")
           n=1
 
-          # 同じ日付のタグを確認し、存在する場合はインクリメント
-          while git rev-parse -q --verify "refs/tags/$date_prefix.$n" >/dev/null; do
+          # 同じ日付のタグが存在するか確認
+          existing_tags=$(gh release list --limit 100 --json tagName -q '.[] | .tagName' | grep "^${date_prefix}")
+
+          # タグのインクリメント処理
+          while echo "$existing_tags" | grep -q "^${date_prefix}\.${n}$"; do
             n=$((n+1))
           done
 
           echo "tag_name=$date_prefix.$n" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         run: |

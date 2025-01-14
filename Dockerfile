@@ -21,6 +21,9 @@ RUN curl -L https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffm
 
 FROM python:3.10-slim
 
+RUN groupadd -g 1000 appgroup && \
+    useradd -m -u 1000 -g appgroup appuser
+
 WORKDIR /workdir
 
 COPY --from=ffmpeg-downloader /workdir/ffmpeg-master-latest-linux64-gpl/bin /usr/local/bin

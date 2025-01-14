@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+    tags: ["*"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: "3.10.10"
+          cache: "pipenv"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        run: pipenv install --dev
+
+      - name: Run tests
+        run: pipenv run python -m pytest

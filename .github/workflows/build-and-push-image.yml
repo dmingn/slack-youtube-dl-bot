@@ -5,10 +5,6 @@ on:
   push:
     branches: ["main"]
     tags: ["*"]
-  workflow_run:
-    workflows: ["Create release"]
-    types:
-      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

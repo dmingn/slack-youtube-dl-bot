@@ -1,6 +1,6 @@
 import pytest
 
-from slack_youtube_dl_bot.__main__ import extract_url_from_message_text
+from slack_youtube_dl_bot.process_message import extract_url_from_message_text
 
 
 @pytest.mark.parametrize(

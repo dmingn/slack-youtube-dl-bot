@@ -152,12 +152,12 @@
         },
         "click": {
             "hashes": [
-                "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2",
-                "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a"
+                "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202",
+                "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.7'",
-            "version": "==8.1.8"
+            "markers": "python_version >= '3.10'",
+            "version": "==8.2.1"
         },
         "frozenlist": {
             "hashes": [
@@ -758,12 +758,12 @@
         },
         "yt-dlp": {
             "hashes": [
-                "sha256:1c9738266921ad43c568ad01ac3362fb7c7af549276fbec92bd72f140da16240",
-                "sha256:3e76bd896b9f96601021ca192ca0fbdd195e3c3dcc28302a3a34c9bc4979da7b"
+                "sha256:a49c4b76afeaded6254c3e2b759d8d5a13271aa963d5fccb51fe059d1c313151",
+                "sha256:ea73854c5dabc124f29a35a8fae9bc5d422ef3231bebeea2bdfa82ac191a9c29"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9'",
-            "version": "==2025.1.26"
+            "version": "==2025.5.22"
         }
     },
     "develop": {
@@ -830,16 +830,13 @@
             "version": "==2.1.0"
         },
         "isort": {
-            "extras": [
-                "pyproject"
-            ],
             "hashes": [
-                "sha256:48fdfcb9face5d58a4f6dde2e72a1fb8dcaf8ab26f95ab49fab84c2ddefb0109",
-                "sha256:8ca5e72a8d85860d5a3fa69b8745237f2939afe12dbf656afbcb47fe72d947a6"
+                "sha256:1cb5df28dfbc742e490c5e41bad6da41b805b0a8be7bc93cd0fb2a8a890ac450",
+                "sha256:2dc5d7f65c9678d94c88dfc29161a320eec67328bc97aad576874cb4be1e9615"
             ],
             "index": "pypi",
-            "markers": "python_full_version >= '3.8.0'",
-            "version": "==5.13.2"
+            "markers": "python_full_version >= '3.9.0'",
+            "version": "==6.0.1"
         },
         "mccabe": {
             "hashes": [

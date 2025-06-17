@@ -22,5 +22,5 @@ updates:
         update-types:
           - "minor"
           - "patch"
-        ignore:
-          - dependency-name: "yt-dlp"
+        exclude-patterns:
+          - "yt-dlp"

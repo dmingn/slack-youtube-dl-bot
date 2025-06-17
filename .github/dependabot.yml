@@ -4,8 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    reviewers:
-      - dmingn
     groups:
       minor-and-patch:
         patterns:
@@ -17,8 +15,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    reviewers:
-      - dmingn
     groups:
       minor-and-patch:
         patterns:

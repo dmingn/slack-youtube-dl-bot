@@ -4,11 +4,23 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    reviewers:
-      - dmingn
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
-    reviewers:
-      - dmingn
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "yt-dlp"

@@ -9,7 +9,7 @@ click = "*"
 logzero = "*"
 pydantic = "*"
 slack-bolt = "*"
-yt-dlp = "*"
+yt-dlp = ">=2025.8.11"
 
 [dev-packages]
 black = "*"

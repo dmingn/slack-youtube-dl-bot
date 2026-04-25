@@ -12,8 +12,15 @@ dependencies = [
     "yt-dlp>=2025.8.11",
 ]
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-select = ["I"]
+ignore = [
+    "E501",
+]
 
 [[tool.mypy.overrides]]
 module = ["logzero"]
@@ -21,9 +28,7 @@ ignore_missing_imports = true
 
 [dependency-groups]
 dev = [
-    "black>=26.3.1",
-    "flake8>=7.3.0",
-    "isort>=8.0.1",
     "mypy>=1.20.2",
     "pytest>=9.0.3",
+    "ruff>=0.12.0",
 ]

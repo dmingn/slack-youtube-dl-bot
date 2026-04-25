@@ -13,7 +13,7 @@ WORKDIR /workdir
 
 RUN apk add --no-cache curl
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 RUN case "${TARGETARCH}" in \
       amd64) ffmpeg_flavor="linux64" ;; \
       arm64) ffmpeg_flavor="linuxarm64" ;; \

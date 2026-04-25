@@ -19,9 +19,8 @@ RUN case "${TARGETARCH}" in \
       arm64) ffmpeg_flavor="linuxarm64" ;; \
       *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
     esac && \
-    curl -L "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${ffmpeg_flavor}-gpl.tar.xz" | tar -Jxf - && \
     mkdir -p /workdir/ffmpeg && \
-    mv "/workdir/ffmpeg-master-latest-${ffmpeg_flavor}-gpl/bin" /workdir/ffmpeg/bin
+    curl -L "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${ffmpeg_flavor}-gpl.tar.xz" | tar -Jxf - -C /workdir/ffmpeg --strip-components=1
 
 FROM python:3.10-slim
 

@@ -21,7 +21,7 @@ RUN case "${TARGETARCH}" in \
     esac && \
     curl -L "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${ffmpeg_flavor}-gpl.tar.xz" | tar -Jxf - && \
     mkdir -p /workdir/ffmpeg && \
-    mv "/workdir/ffmpeg-master-latest-${ffmpeg_flavor}-gpl" /workdir/ffmpeg
+    mv "/workdir/ffmpeg-master-latest-${ffmpeg_flavor}-gpl/bin" /workdir/ffmpeg/bin
 
 FROM python:3.10-slim
 

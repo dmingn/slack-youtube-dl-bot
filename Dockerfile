@@ -11,7 +11,7 @@ FROM alpine:latest AS ffmpeg-downloader
 
 WORKDIR /workdir
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl xz
 
 ARG TARGETARCH=amd64
 RUN case "${TARGETARCH}" in \

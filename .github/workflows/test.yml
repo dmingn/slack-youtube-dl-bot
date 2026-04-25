@@ -19,17 +19,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
-      - name: Set up Python
-        uses: actions/setup-python@v5.6.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
         with:
-          python-version: "3.10.10"
-          cache: "pipenv"
-
-      - name: Install pipenv
-        run: pip install pipenv
+          enable-cache: true
 
       - name: Install dependencies
-        run: pipenv sync --dev
+        run: uv sync --locked --dev
 
       - name: Run tests
-        run: pipenv run python -m pytest
+        run: make test

@@ -12,12 +12,15 @@ from slack_youtube_dl_bot.worker import worker
 async def main(n_workers: int):
     logger.debug(f"Start the bot with {n_workers} workers.")
 
+    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
+    slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
+    if not slack_app_token or not slack_bot_token:
+        raise click.ClickException(
+            "Environment variables SLACK_APP_TOKEN and SLACK_BOT_TOKEN are required."
+        )
+
     # Defer importing Slack app until runtime so `--help` works without env vars.
     from slack_youtube_dl_bot.slack_app import app
-
-    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
-    if not slack_app_token:
-        raise click.ClickException("Environment variable SLACK_APP_TOKEN is required.")
 
     slack_bot = asyncio.create_task(
         AsyncSocketModeHandler(app, slack_app_token).start_async()

@@ -2,6 +2,39 @@
 clean:
 	git clean -Xf out/
 
+.PHONY: docker-smoke
+docker-smoke:
+	@test -n "$(IMAGE)" || (echo "ERROR: IMAGE is required (e.g. IMAGE=slack-youtube-dl-bot:dev)" >&2; exit 1)
+	@set -e; \
+	PLATFORM="$${PLATFORM:-}"; \
+	if [ -n "$$PLATFORM" ]; then \
+	  platform_flag="--platform $$PLATFORM"; \
+	else \
+	  platform_flag=""; \
+	fi; \
+	echo "Smoke testing $$IMAGE ($${PLATFORM:-native})"; \
+	docker run --rm $$platform_flag --entrypoint python "$(IMAGE)" -m slack_youtube_dl_bot --help >/dev/null; \
+	docker run --rm $$platform_flag --entrypoint ffmpeg "$(IMAGE)" -version >/dev/null; \
+	echo "OK"
+
+.PHONY: docker-build-smoke
+docker-build-smoke:
+	@set -e; \
+	TAG="$${TAG:-local-smoke}"; \
+	PLATFORM="$${PLATFORM:-}"; \
+	if [ -z "$$PLATFORM" ]; then \
+	  echo "ERROR: PLATFORM is required (e.g. PLATFORM=linux/amd64)" >&2; \
+	  exit 1; \
+	fi; \
+	echo "Building $$TAG for $$PLATFORM"; \
+	docker buildx build --load --platform "$$PLATFORM" -t "$$TAG" .; \
+	$(MAKE) docker-smoke IMAGE="$$TAG" PLATFORM="$$PLATFORM"
+
+.PHONY: docker-build-smoke-all
+docker-build-smoke-all:
+	$(MAKE) docker-build-smoke TAG="$${TAG:-local-smoke-amd64}" PLATFORM=linux/amd64
+	$(MAKE) docker-build-smoke TAG="$${TAG:-local-smoke-arm64}" PLATFORM=linux/arm64
+
 .PHONY: fmt
 fmt:
 	uv run ruff format .

@@ -78,8 +78,7 @@ jobs:
 
       - name: Smoke test (linux/amd64)
         run: |
-          docker run --rm --platform linux/amd64 --entrypoint python smoke-test-amd64:${{ github.sha }} -m slack_youtube_dl_bot --help
-          docker run --rm --platform linux/amd64 --entrypoint ffmpeg smoke-test-amd64:${{ github.sha }} -version
+          make docker-smoke IMAGE=smoke-test-amd64:${{ github.sha }} PLATFORM=linux/amd64
 
       - name: Build image for smoke test (linux/arm64, local load)
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -93,8 +92,7 @@ jobs:
 
       - name: Smoke test (linux/arm64)
         run: |
-          docker run --rm --platform linux/arm64 --entrypoint python smoke-test-arm64:${{ github.sha }} -m slack_youtube_dl_bot --help
-          docker run --rm --platform linux/arm64 --entrypoint ffmpeg smoke-test-arm64:${{ github.sha }} -version
+          make docker-smoke IMAGE=smoke-test-arm64:${{ github.sha }} PLATFORM=linux/arm64
 
       - name: Build and push Docker image
         id: build-push-action

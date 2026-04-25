@@ -2,9 +2,26 @@
 clean:
 	git clean -Xf out/
 
+.PHONY: fmt
+fmt:
+	uv run ruff format .
+	uv run ruff check --fix .
+
+.PHONY: lint
+lint:
+	uv run ruff format --check .
+	uv run ruff check .
+
+.PHONY: typecheck
+typecheck:
+	uv run mypy .
+
 .PHONY: test
 test:
 	uv run python -m pytest -q
+
+.PHONY: check
+check: lint typecheck test
 
 DATE := $(shell date +%Y.%m.%d)
 EXISTING_TAGS := $(shell git tag -l "$(DATE).*")

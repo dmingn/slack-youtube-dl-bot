@@ -2,6 +2,10 @@
 clean:
 	git clean -Xf out/
 
+.PHONY: test
+test:
+	uv run python -m pytest -q
+
 DATE := $(shell date +%Y.%m.%d)
 EXISTING_TAGS := $(shell git tag -l "$(DATE).*")
 

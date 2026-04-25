@@ -2,14 +2,10 @@ FROM python:3.10-slim AS builder
 
 WORKDIR /workdir
 
-ENV PIPENV_HOME=/opt/pipenv
+COPY pyproject.toml uv.lock ./
 
-RUN python3 -m venv $PIPENV_HOME && \
-    $PIPENV_HOME/bin/pip install pipenv==2023.6.2
-
-COPY Pipfile Pipfile.lock ./
-
-RUN $PIPENV_HOME/bin/pipenv sync --system
+RUN pip install --no-cache-dir uv && \
+    uv sync --locked --no-dev
 
 FROM alpine:latest AS ffmpeg-downloader
 
@@ -28,8 +24,10 @@ WORKDIR /workdir
 
 COPY --from=ffmpeg-downloader /workdir/ffmpeg-master-latest-linux64-gpl/bin /usr/local/bin
 
-COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+COPY --from=builder /workdir/.venv /workdir/.venv
 
 COPY slack_youtube_dl_bot ./slack_youtube_dl_bot
+
+ENV PATH="/workdir/.venv/bin:$PATH"
 
 ENTRYPOINT ["python", "-m", "slack_youtube_dl_bot"]

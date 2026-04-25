@@ -19,7 +19,9 @@ RUN case "${TARGETARCH}" in \
       arm64) ffmpeg_flavor="linuxarm64" ;; \
       *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
     esac && \
-    curl -L "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${ffmpeg_flavor}-gpl.tar.xz" | tar -Jxf -
+    curl -L "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${ffmpeg_flavor}-gpl.tar.xz" | tar -Jxf - && \
+    mkdir -p /workdir/ffmpeg && \
+    mv "/workdir/ffmpeg-master-latest-${ffmpeg_flavor}-gpl" /workdir/ffmpeg
 
 FROM python:3.10-slim
 
@@ -28,7 +30,7 @@ RUN groupadd -g 1000 appgroup && \
 
 WORKDIR /workdir
 
-COPY --from=ffmpeg-downloader /workdir/ffmpeg-master-latest-linux64-gpl/bin /usr/local/bin
+COPY --from=ffmpeg-downloader /workdir/ffmpeg/bin /usr/local/bin
 
 COPY --from=builder /workdir/.venv /workdir/.venv
 

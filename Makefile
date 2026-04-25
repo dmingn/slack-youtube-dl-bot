@@ -32,8 +32,8 @@ docker-build-smoke:
 
 .PHONY: docker-build-smoke-all
 docker-build-smoke-all:
-	$(MAKE) docker-build-smoke TAG="$${TAG:-local-smoke-amd64}" PLATFORM=linux/amd64
-	$(MAKE) docker-build-smoke TAG="$${TAG:-local-smoke-arm64}" PLATFORM=linux/arm64
+	$(MAKE) docker-build-smoke TAG="$${TAG:-local-smoke}-amd64" PLATFORM=linux/amd64
+	$(MAKE) docker-build-smoke TAG="$${TAG:-local-smoke}-arm64" PLATFORM=linux/arm64
 
 .PHONY: fmt
 fmt:

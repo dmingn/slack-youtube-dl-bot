@@ -6,15 +6,24 @@ from logzero import logger
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 
 from slack_youtube_dl_bot.job import job_queue
-from slack_youtube_dl_bot.slack_app import app
 from slack_youtube_dl_bot.worker import worker
 
 
 async def main(n_workers: int):
     logger.debug(f"Start the bot with {n_workers} workers.")
 
+    slack_app_token = os.environ.get("SLACK_APP_TOKEN")
+    slack_bot_token = os.environ.get("SLACK_BOT_TOKEN")
+    if not slack_app_token or not slack_bot_token:
+        raise click.ClickException(
+            "Environment variables SLACK_APP_TOKEN and SLACK_BOT_TOKEN are required."
+        )
+
+    # Defer importing Slack app until runtime so `--help` works without env vars.
+    from slack_youtube_dl_bot.slack_app import app
+
     slack_bot = asyncio.create_task(
-        AsyncSocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start_async()
+        AsyncSocketModeHandler(app, slack_app_token).start_async()
     )
 
     workers = [asyncio.create_task(worker(i)) for i in range(n_workers)]

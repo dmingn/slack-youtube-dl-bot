@@ -13,11 +13,12 @@ WORKDIR /workdir
 
 RUN apk add --no-cache curl xz
 
-ARG TARGETARCH=amd64
-RUN case "${TARGETARCH}" in \
+ARG TARGETARCH
+RUN arch="${TARGETARCH:-amd64}" && \
+    case "$arch" in \
       amd64) ffmpeg_flavor="linux64" ;; \
       arm64) ffmpeg_flavor="linuxarm64" ;; \
-      *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
+      *) echo "Unsupported TARGETARCH: $arch" >&2; exit 1 ;; \
     esac && \
     mkdir -p /workdir/ffmpeg && \
     curl -fsSL "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${ffmpeg_flavor}-gpl.tar.xz" | tar -Jxf - -C /workdir/ffmpeg --strip-components=1

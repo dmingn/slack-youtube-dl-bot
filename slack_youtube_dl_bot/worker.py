@@ -3,6 +3,7 @@ import asyncio
 from logzero import logger
 
 from slack_youtube_dl_bot.job import Job, job_queue
+from slack_youtube_dl_bot.yt_dlp_cmd import build_yt_dlp_cmd
 
 
 async def process_job(job: Job, worker_id: int) -> None:
@@ -10,18 +11,9 @@ async def process_job(job: Job, worker_id: int) -> None:
 
     logger.debug(f"Start downloading {job.url}")
 
-    proc = await asyncio.create_subprocess_shell(
-        " ".join(
-            [
-                "python",
-                "-m",
-                "yt_dlp",
-                "-o",
-                '"/out/%(extractor)s/%(channel)s - %(channel_id)s/%(playlist)s - %(playlist_id)s/%(title)s - %(id)s.%(ext)s"',
-                "--no-progress",
-                f'"{job.url}"',
-            ]
-        ),
+    cmd = build_yt_dlp_cmd(url=str(job.url))
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )

@@ -46,8 +46,8 @@ async def test_process_job_happy_path_streams_subprocess_output_to_slack(monkeyp
 
     created: dict = {}
 
-    async def fake_create_subprocess_shell(cmd, stdout=None, stderr=None):
-        created["cmd"] = cmd
+    async def fake_create_subprocess_exec(*cmd, stdout=None, stderr=None):
+        created["cmd"] = tuple(cmd)
         created["stdout"] = stdout
         created["stderr"] = stderr
         return _FakeProc(
@@ -58,14 +58,14 @@ async def test_process_job_happy_path_streams_subprocess_output_to_slack(monkeyp
         return None
 
     monkeypatch.setattr(
-        "slack_youtube_dl_bot.worker.asyncio.create_subprocess_shell",
-        fake_create_subprocess_shell,
+        "slack_youtube_dl_bot.worker.asyncio.create_subprocess_exec",
+        fake_create_subprocess_exec,
     )
     monkeypatch.setattr("slack_youtube_dl_bot.worker.asyncio.sleep", fake_sleep)
 
     await process_job(job=job, worker_id=7)
 
-    assert "python -m yt_dlp" in created["cmd"]
+    assert created["cmd"][:3] == ("python", "-m", "yt_dlp")
     assert "https://example.com/video" in created["cmd"]
 
     texts = [c["text"] for c in say.calls]

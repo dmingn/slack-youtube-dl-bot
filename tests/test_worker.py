@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 from slack_bolt.context.say.async_say import AsyncSay
 
@@ -65,7 +67,7 @@ async def test_process_job_happy_path_streams_subprocess_output_to_slack(monkeyp
 
     await process_job(job=job, worker_id=7)
 
-    assert created["cmd"][:3] == ("python", "-m", "yt_dlp")
+    assert created["cmd"][:3] == (sys.executable, "-m", "yt_dlp")
     assert "https://example.com/video" in created["cmd"]
 
     texts = [c["text"] for c in say.calls]

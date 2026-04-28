@@ -1,3 +1,4 @@
+import sys
 from typing import Final
 
 _DEFAULT_OUTPUT_TEMPLATE: Final[str] = (
@@ -11,7 +12,7 @@ def build_yt_dlp_cmd(
     *, url: str, output_template: str = _DEFAULT_OUTPUT_TEMPLATE
 ) -> tuple[str, ...]:
     return (
-        "python",
+        sys.executable,
         "-m",
         "yt_dlp",
         "-o",

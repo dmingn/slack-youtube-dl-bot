@@ -5,9 +5,41 @@ from logzero import logger
 from slack_youtube_dl_bot.job import Job, job_queue
 from slack_youtube_dl_bot.yt_dlp_cmd import build_yt_dlp_cmd
 
+POST_INTERVAL_SECONDS = 10.0
+SLACK_MESSAGE_CHAR_LIMIT = 4000
+
+
+def chunk_output_lines(
+    lines: list[str], max_chars: int = SLACK_MESSAGE_CHAR_LIMIT
+) -> list[str]:
+    chunks: list[str] = []
+    current = ""
+
+    for line in lines:
+        if len(line) > max_chars:
+            if current:
+                chunks.append(current)
+                current = ""
+            for idx in range(0, len(line), max_chars):
+                chunks.append(line[idx : idx + max_chars])
+            continue
+
+        if len(current) + len(line) > max_chars:
+            chunks.append(current)
+            current = line
+            continue
+
+        current += line
+
+    if current:
+        chunks.append(current)
+
+    return chunks
+
 
 async def process_job(job: Job, worker_id: int) -> None:
     message_prefix = f"[worker-{worker_id}] "
+    message_buffer: list[str] = []
 
     logger.debug(f"Start downloading {job.url}")
 
@@ -18,6 +50,14 @@ async def process_job(job: Job, worker_id: int) -> None:
         stderr=asyncio.subprocess.PIPE,
     )
 
+    async def flush_buffer() -> None:
+        if not message_buffer:
+            return
+        chunks = chunk_output_lines(message_buffer)
+        message_buffer.clear()
+        for chunk in chunks:
+            await job.reply(chunk)
+
     if proc.stdout and proc.stderr:
         while True:
             if proc.stdout.at_eof() and proc.stderr.at_eof():
@@ -26,13 +66,16 @@ async def process_job(job: Job, worker_id: int) -> None:
             stdout = (await proc.stdout.readline()).decode()
             if stdout:
                 logger.debug(stdout)
-                await job.reply(message_prefix + stdout)
+                message_buffer.append(message_prefix + stdout)
             stderr = (await proc.stderr.readline()).decode()
             if stderr:
                 logger.debug(stderr)
-                await job.reply(message_prefix + stderr)
+                message_buffer.append(message_prefix + stderr)
 
-            await asyncio.sleep(1)
+            await flush_buffer()
+            await asyncio.sleep(POST_INTERVAL_SECONDS)
+
+        await flush_buffer()
 
     await proc.communicate()
 

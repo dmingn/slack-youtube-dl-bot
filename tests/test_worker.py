@@ -42,7 +42,9 @@ class _FakeProc:
 
 
 @pytest.mark.asyncio
-async def test_process_job_happy_path_posts_buffered_subprocess_output_to_slack(monkeypatch):
+async def test_process_job_happy_path_posts_buffered_subprocess_output_to_slack(
+    monkeypatch,
+):
     say = _RecordingSay()
     job = Job(url="https://example.com/video", thread_ts="123.456", say=say)
 

@@ -6,6 +6,35 @@ from slack_youtube_dl_bot.job import Job, job_queue
 from slack_youtube_dl_bot.yt_dlp_cmd import build_yt_dlp_cmd
 
 POST_INTERVAL_SECONDS = 10.0
+SLACK_MESSAGE_CHAR_LIMIT = 4000
+
+
+def chunk_output_lines(
+    lines: list[str], max_chars: int = SLACK_MESSAGE_CHAR_LIMIT
+) -> list[str]:
+    chunks: list[str] = []
+    current = ""
+
+    for line in lines:
+        if len(line) > max_chars:
+            if current:
+                chunks.append(current)
+                current = ""
+            for idx in range(0, len(line), max_chars):
+                chunks.append(line[idx : idx + max_chars])
+            continue
+
+        if len(current) + len(line) > max_chars:
+            chunks.append(current)
+            current = line
+            continue
+
+        current += line
+
+    if current:
+        chunks.append(current)
+
+    return chunks
 
 
 async def process_job(job: Job, worker_id: int) -> None:
@@ -24,9 +53,10 @@ async def process_job(job: Job, worker_id: int) -> None:
     async def flush_buffer() -> None:
         if not message_buffer:
             return
-        content = "".join(message_buffer)
+        chunks = chunk_output_lines(message_buffer)
         message_buffer.clear()
-        await job.reply(content)
+        for chunk in chunks:
+            await job.reply(chunk)
 
     if proc.stdout and proc.stderr:
         while True:

@@ -4,7 +4,11 @@ import pytest
 from slack_bolt.context.say.async_say import AsyncSay
 
 from slack_youtube_dl_bot.job import Job
-from slack_youtube_dl_bot.worker import POST_INTERVAL_SECONDS, process_job
+from slack_youtube_dl_bot.worker import (
+    POST_INTERVAL_SECONDS,
+    chunk_output_lines,
+    process_job,
+)
 
 
 class _RecordingSay(AsyncSay):
@@ -78,3 +82,19 @@ async def test_process_job_happy_path_posts_buffered_subprocess_output_to_slack(
     texts = [c["text"] for c in say.calls]
     assert texts == ["[worker-7] hello-stdout\n[worker-7] hello-stderr\n"]
     assert sleep_calls == [POST_INTERVAL_SECONDS]
+
+
+def test_chunk_output_lines_prefers_newline_boundaries():
+    lines = ["aaa\n", "bbb\n", "ccc\n"]
+
+    chunks = chunk_output_lines(lines, max_chars=8)
+
+    assert chunks == ["aaa\nbbb\n", "ccc\n"]
+
+
+def test_chunk_output_lines_splits_single_long_line():
+    lines = ["abcdefghij"]
+
+    chunks = chunk_output_lines(lines, max_chars=4)
+
+    assert chunks == ["abcd", "efgh", "ij"]

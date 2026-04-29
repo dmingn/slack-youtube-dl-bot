@@ -24,8 +24,9 @@ async def process_job(job: Job, worker_id: int) -> None:
     async def flush_buffer() -> None:
         if not message_buffer:
             return
-        await job.reply("".join(message_buffer))
+        content = "".join(message_buffer)
         message_buffer.clear()
+        await job.reply(content)
 
     if proc.stdout and proc.stderr:
         while True:

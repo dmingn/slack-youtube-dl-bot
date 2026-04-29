@@ -4,7 +4,7 @@ import pytest
 from slack_bolt.context.say.async_say import AsyncSay
 
 from slack_youtube_dl_bot.job import Job
-from slack_youtube_dl_bot.worker import process_job
+from slack_youtube_dl_bot.worker import POST_INTERVAL_SECONDS, process_job
 
 
 class _RecordingSay(AsyncSay):
@@ -42,7 +42,7 @@ class _FakeProc:
 
 
 @pytest.mark.asyncio
-async def test_process_job_happy_path_streams_subprocess_output_to_slack(monkeypatch):
+async def test_process_job_happy_path_posts_buffered_subprocess_output_to_slack(monkeypatch):
     say = _RecordingSay()
     job = Job(url="https://example.com/video", thread_ts="123.456", say=say)
 
@@ -56,7 +56,10 @@ async def test_process_job_happy_path_streams_subprocess_output_to_slack(monkeyp
             stdout_lines=[b"hello-stdout\n"], stderr_lines=[b"hello-stderr\n"]
         )
 
-    async def fake_sleep(_seconds: float):
+    sleep_calls: list[float] = []
+
+    async def fake_sleep(seconds: float):
+        sleep_calls.append(seconds)
         return None
 
     monkeypatch.setattr(
@@ -71,5 +74,5 @@ async def test_process_job_happy_path_streams_subprocess_output_to_slack(monkeyp
     assert "https://example.com/video" in created["cmd"]
 
     texts = [c["text"] for c in say.calls]
-    assert "[worker-7] hello-stdout\n" in texts
-    assert "[worker-7] hello-stderr\n" in texts
+    assert texts == ["[worker-7] hello-stdout\n[worker-7] hello-stderr\n"]
+    assert sleep_calls == [POST_INTERVAL_SECONDS]

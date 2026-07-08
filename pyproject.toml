@@ -9,7 +9,7 @@ dependencies = [
     "logzero>=1.7.0",
     "pydantic>=2.13.3",
     "slack-bolt>=1.28.0",
-    "yt-dlp>=2025.8.11",
+    "yt-dlp>=2026.7.4",
 ]
 
 [tool.ruff]
